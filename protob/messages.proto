@@ -131,6 +131,14 @@ enum MessageType {
 	MessageType_StellarManageDataOp = 220 [(wire_in) = true];
 	MessageType_StellarBumpSequenceOp = 221 [(wire_in) = true];
 	MessageType_StellarSignedTx = 230 [(wire_out) = true];
+
+	// Ripple
+	MessageType_RippleGetPublicKey = 300 [(wire_in) = true];
+	MessageType_RipplePublicKey = 301 [(wire_out) = true];
+	MessageType_RippleGetAddress = 302 [(wire_in) = true];
+	MessageType_RippleAddress = 303 [(wire_out) = true];
+	MessageType_RippleSignTx = 304 [(wire_in) = true];
+	MessageType_RipplePaymentType = 305 [(wire_in) = true];
 }
 
 ////////////////////
@@ -1348,6 +1356,91 @@ message LiskVerifyMessage {
 	optional bytes signature = 2;
 	optional bytes message = 3;
 }
+
+
+//////////////////////
+// Ripple messages //
+//////////////////////
+
+/**
+ * Request: Public key at the specified index
+ * @next RipplePublicKey
+ */
+message RippleGetPublicKey {
+	repeated uint32 address_n = 1;			// BIP-32 path. For compatibility with other wallets, must be m/44'/144'/index'
+	optional bool show_display = 2;			// optionally show on display before sending the result
+}
+
+/**
+ * Response: Public key for the given index
+ * @prev RippleGetPublicKey
+ */
+message RipplePublicKey {
+	optional bytes public_key = 1;	// Raw bytes of the public key (no version or checksum)
+}
+
+/**
+ * Request: Address at the specified index
+ * @next RippleAddress
+ */
+message RippleGetAddress {
+	repeated uint32 address_n = 1;			// BIP-32 path. For compatibility with other wallets, must be m/44'/144'/index'
+	optional bool show_display = 2;			// optionally show on display before sending the result
+}
+
+/**
+ * Response: Address for the given index
+ * @prev RippleGetAddress
+ */
+message RippleAddress {
+	optional string address = 1;	// Address in Ripple format (base58 of a pubkey with checksum)
+}
+
+/**
+ * Request: ask device to sign Ripple transaction
+ * @next RippleTxOpRequest
+ */
+//message RippleSignTx {
+//	optional uint32 protocol_version = 1;	// version of the protofbuf messaging protocol the client is using
+//	repeated uint32 address_n = 2;			// BIP-32 path. For compatibility with other wallets, must be m/44'/144'/index'
+//	optional string account = 4;			// source account address
+//	optional uint32 fee = 5;				// Fee (in drops) for the transaction
+//	optional uint32 sequence = 6;			// transaction sequence number
+//	optional uint32 last_ledger_sequence = 7;	// highest ledger index this transaction can appear in.
+//}
+//
+///**
+// * Response: device is ready for client to send the next operation
+// * @prev RippleSignTx
+// * @next RipplePaymentOp
+// * @next RippleCreateAccountOp
+// * @next RipplePathPaymentOp
+// * @next RippleManageOfferOp
+// * @next RippleCreatePassiveOfferOp
+// * @next RippleSetOptionsOp
+// * @next RippleChangeTrustOp
+// * @next RippleAllowTrustOp
+// * @next RippleAccountMergeOp
+// * @next RippleManageDataOp
+// * @next RippleBumpSequenceOp
+// */
+//message RippleTxOpRequest {
+//}
+
+///**
+// * Request: ask device to confirm this operation type
+// * @prev RippleTxOpRequest
+// * @next RippleTxOpRequest
+// * @next RippleSignedTx
+// */
+//message RipplePaymentTransaction {
+//	optional string source_account = 1;		// (optional) source account address
+//
+//	optional string destination_account = 2;	// destination account address
+//	optional RippleAssetType asset = 3;	// asset involved in the operation
+//	optional sint64 amount = 4;				// amount of the given asset to pay
+//}
+
 
 /////////////////////////////////////////////////////////////
 // Debug messages (only available if DebugLink is enabled) //
